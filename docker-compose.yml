@@ -1,0 +1,29 @@
+services:
+  utcp-mcp-server:
+    build: .
+    privileged: true
+    ports:
+      - "8776:8776"
+      - "8777:8777"
+      - "8778:8778"
+    environment:
+      - PROVIDERS_PATH=/app/data/providers.json
+      - HOST=0.0.0.0
+      - FASTAPI_PORT=8778
+      - MCP_PROXY_PORT=8777
+      - MCP_CLIENT_PORT=8776
+      - MCP_PROXY_PATH=/utcp-proxy
+      - MCP_CLIENT_PATH=/utcp-client
+      # Docker-in-Docker specific environment variables
+      - DOCKER_TLS_CERTDIR=/certs
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - ./data:/app/data
+      - docker-certs-ca:/certs/ca
+      - docker-certs-client:/certs/client
+    restart: unless-stopped
+    init: true
+
+volumes:
+  docker-certs-ca:
+  docker-certs-client:

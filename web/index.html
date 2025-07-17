@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTCP-MCP Bridge</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f4f6fa;
+            color: #222;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background: #232946;
+            color: #fff;
+            padding: 24px 0;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar h2 {
+            margin: 0 0 24px 24px;
+            font-size: 1.3em;
+            letter-spacing: 1px;
+        }
+        .provider-list {
+            list-style: none;
+            padding: 0 0 0 24px;
+            margin: 0;
+        }
+        .provider-list li {
+            margin-bottom: 16px;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .provider-list li.selected, .provider-list li:hover {
+            background: #394867;
+        }
+        .main {
+            flex: 1;
+            padding: 32px 48px;
+            overflow-y: auto;
+        }
+        .tools-header {
+            font-size: 1.5em;
+            margin-bottom: 18px;
+        }
+        .tool-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+        .tool-card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 20px 18px 16px 18px;
+            display: flex;
+            flex-direction: column;
+        }
+        .tool-card h3 {
+            margin: 0 0 8px 0;
+            font-size: 1.05em;
+            color: #232946;
+            word-break: break-all;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            cursor: pointer;
+        }
+        .tool-card .desc {
+            font-size: 0.98em;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .tool-card .inputs {
+            font-size: 0.93em;
+            color: #888;
+        }
+        @media (max-width: 700px) {
+            .container { flex-direction: column; }
+            .sidebar { width: 100%; flex-direction: row; padding: 12px 0; }
+            .main { padding: 18px 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h2>Providers</h2>
+            <ul class="provider-list" id="providerList">
+                <li>Loading...</li>
+            </ul>
+        </aside>
+        <main class="main">
+            <div class="tools-header" id="toolsHeader">Tools</div>
+            <div class="tool-list" id="toolList">
+                <div>Loading...</div>
+            </div>
+        </main>
+    </div>
+    <script>
+        // Fetch providers and tools from backend
+        let providers = [];
+        let tools = [];
+        let selectedProvider = null;
+
+        async function fetchProviders() {
+            const res = await fetch('/providers');
+            if (!res.ok) return [];
+            const data = await res.json();
+            return data.providers || [];
+        }
+
+        async function fetchTools() {
+            const res = await fetch('/tools');
+            if (!res.ok) return [];
+            const data = await res.json();
+            return data.tools || [];
+        }
+
+        function renderProviders() {
+            const list = document.getElementById('providerList');
+            list.innerHTML = '';
+            providers.forEach(provider => {
+                const li = document.createElement('li');
+                li.textContent = provider.name || provider;
+                li.onclick = () => {
+                    selectedProvider = provider.name || provider;
+                    renderProviders();
+                    renderTools();
+                };
+                if ((provider.name || provider) === selectedProvider) {
+                    li.classList.add('selected');
+                }
+                list.appendChild(li);
+            });
+        }
+
+        function renderTools() {
+            const list = document.getElementById('toolList');
+            list.innerHTML = '';
+            let filtered = tools;
+            if (selectedProvider) {
+                filtered = tools.filter(tool => {
+                    // Filter by tool name prefix: providerName. (dot)
+                    if (!tool.name) return false;
+                    const toolProvider = tool.name.split('.')[0];
+                    return toolProvider === selectedProvider;
+                });
+            }
+            if (filtered.length === 0) {
+                list.innerHTML = '<div>No tools found for this provider.</div>';
+                return;
+            }
+            filtered.forEach(tool => {
+                const card = document.createElement('div');
+                card.className = 'tool-card';
+                card.innerHTML = `
+                    <h3 title="${tool.name}">${tool.name}</h3>
+                    <div class="desc">${tool.description || ''}</div>
+                    <div class="inputs"><b>Inputs:</b> ${tool.inputs ? Object.keys(tool.inputs).join(', ') : 'None'}</div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        async function init() {
+            // Fetch providers and tools
+            providers = await fetchProviders();
+            tools = await fetchTools();
+            if (providers.length > 0) {
+                selectedProvider = providers[0].name || providers[0];
+            }
+            renderProviders();
+            renderTools();
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
