@@ -18,7 +18,7 @@ With UTCP-MCP Bridge, you only need to install one MCP server to access, manage,
 
 You can run the UTCP-MCP Bridge in two ways: using Docker or a local bash script.
 
-### 1. Run with Docker
+### 1.1 Run with Docker
 
 Ensure you have Docker and Docker Compose installed.
 
@@ -26,7 +26,7 @@ Ensure you have Docker and Docker Compose installed.
 docker-compose up --build
 ```
 
-### 2. Run with Bash Script (Locally)
+### 1.2 Run with Bash Script (Locally)
 
 Ensure you have Python 3 installed.
 
@@ -42,7 +42,32 @@ This will:
   - `8777` (UTCP Proxy MCP)
   - `8778` (FastAPI web server)
 
-You can access the web interface at: [http://localhost:8778/](http://localhost:8778/)
+### 2 Connect with your MCP Client of choice
+
+To connect your MCP client to the UTCP-MCP Bridge, add the following entries to your client's `mcp.json` (or equivalent configuration file):
+
+```json
+{
+  "mcpServers": {
+    // any other mcp servers
+    "utcp-proxy-mcp-local": {
+      "url": "http://localhost:8777/utcp-proxy"
+    },
+    "utcp-client-mcp-local": {
+      "url": "http://localhost:8776/utcp-client"
+    }
+  }
+}
+```
+
+- `utcp-proxy-mcp-local` connects to the UTCP Proxy MCP server (port 8777)
+- `utcp-client-mcp-local` connects to the UTCP Client MCP server (port 8776)
+
+Adjust the URLs if you are running the server on a different host or port.
+
+### 3 UI Interface
+
+Web Interface to view and manage providers and tools is accessible in any browser at [http://localhost:8778/](http://localhost:8778/)
 
 ---
 
