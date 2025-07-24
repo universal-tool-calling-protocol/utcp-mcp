@@ -1,0 +1,28 @@
+# MCP Strands Agent Requirements
+
+# Core MCP and Strands dependencies
+strands-agents 
+strands-agents-tools
+mcp>=1.0.0
+
+# AWS SDK for Amazon Bedrock model access
+boto3>=1.34.0
+botocore>=1.34.0
+
+# HTTP client for MCP connections
+httpx>=0.25.0
+aiohttp>=3.8.0
+
+# Async support
+asyncio-mqtt>=0.11.0
+
+# Environment and configuration
+python-dotenv>=1.0.0
+
+# Optional: Enhanced CLI experience
+rich>=13.0.0
+click>=8.1.0
+
+# Development and debugging (optional)
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
