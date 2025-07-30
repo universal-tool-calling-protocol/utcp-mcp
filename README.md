@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/universal-tool-calling-protocol-utcp-mcp-badge.png)](https://mseep.ai/app/universal-tool-calling-protocol-utcp-mcp)
+
 # UTCP-MCP Bridge
 
 ## Overview
