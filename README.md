@@ -71,6 +71,9 @@ Adjust the URLs if you are running the server on a different host or port.
 
 Web Interface to view and manage providers and tools is accessible in any browser at [http://localhost:8778/](http://localhost:8778/)
 
+<img width="1512" height="982" alt="Screenshot 2025-07-30 at 17 53 42" src="https://github.com/user-attachments/assets/2164587b-72ec-426f-98be-3a75df761dbb" />
+
+
 ---
 
 ## Configuration
