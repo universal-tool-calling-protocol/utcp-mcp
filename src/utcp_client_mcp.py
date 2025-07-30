@@ -7,6 +7,7 @@ from utcp.client.utcp_client import UtcpClient
 from utcp.client.utcp_client_config import UtcpClientConfig
 from utcp.client.tool_repositories.in_mem_tool_repository import InMemToolRepository
 from utcp.client.tool_search_strategies.tag_search import TagSearchStrategy
+from utcp.shared.provider import Provider
 from typing import Dict, Any, List, Optional
 
 
@@ -29,7 +30,6 @@ class UTCPClient:
     async def _register_mcp_tools(self):
         @self.mcp.tool(name="register_tool_provider", description="Register a tool provider. Args: provider_dict (dict)")
         async def register_tool_provider(provider_dict: Dict[str, Any]) -> List[Dict[str, Any]]:
-            from utcp.shared.provider import Provider
             provider = Provider.model_validate(provider_dict)
             tools = await self.client.register_tool_provider(provider)
             return [tool.model_dump() for tool in tools]
@@ -47,6 +47,14 @@ class UTCPClient:
         async def search_tools(query: str, limit: int = 10) -> List[Dict[str, Any]]:
             tools = self.client.search_tools(query, limit)
             return [tool.model_dump() for tool in tools]
+
+    async def add_provider(self, provider_obj) -> None:
+        logger.info(f"UTCP-CLIENT-MCP: registering provider {provider_obj.name}")
+        await self.client.register_tool_provider(provider_obj)
+
+    async def remove_provider(self, provider_name: str) -> None:
+        logger.info(f"UTCP-CLIENT-MCP: deregistering provider {provider_name}")
+        await self.client.deregister_tool_provider(provider_name)
 
     async def cleanup(self) -> None:
         """Clean up resources"""

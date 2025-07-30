@@ -1,4 +1,5 @@
 import asyncio
+import keyword
 from contextlib import asynccontextmanager
 from typing import Dict, List, Optional, Any
 from fastmcp import FastMCP
@@ -11,7 +12,7 @@ from utcp.client.utcp_client import UtcpClient
 from utcp.client.utcp_client_config import UtcpClientConfig
 from utcp.client.tool_repositories.in_mem_tool_repository import InMemToolRepository
 from utcp.client.tool_search_strategies.tag_search import TagSearchStrategy
-import keyword
+from utcp.shared.provider import Provider
 
 
 class UTCPProxy:
@@ -93,6 +94,69 @@ class UTCPProxy:
 
         return proxy_func
     
+    async def add_provider(self, provider_obj) -> None:
+        logger.info(f"UTCP-PROXY-MCP: registering provider {provider_obj.name}")
+        
+        # Get the old tool list to compare
+        old_tools = {getattr(tool, 'name', 'unknown') for tool in self.tools}
+        logger.info(f"UTCP-PROXY-MCP: old tools count: {len(old_tools)}")
+        
+        # Register with UTCP
+        await self.client.register_tool_provider(provider_obj)
+        
+        # Refresh tool and provider lists
+        self.tools = await self.client.tool_repository.get_tools()
+        self.providers = await self.client.tool_repository.get_providers()
+        
+        # Get new tools and only register the ones that are actually new
+        new_tools = {getattr(tool, 'name', 'unknown') for tool in self.tools}
+        tools_to_add = new_tools - old_tools
+        logger.info(f"UTCP-PROXY-MCP: new tools count: {len(new_tools)}, tools to add: {len(tools_to_add)}")
+        
+        # Register only the new tools
+        new_tool_count = 0
+        for tool in self.tools:
+            tool_name = getattr(tool, 'name', 'unknown')
+            if tool_name in tools_to_add:
+                try:
+                    proxy_func = self._create_tool_proxy(tool)
+                    self.mcp.tool(name=tool_name, description=getattr(tool, 'description', None))(proxy_func)
+                    new_tool_count += 1
+                    logger.info(f"UTCP-PROXY-MCP: registered new MCP tool {tool_name}")
+                except Exception as e:
+                    logger.error(f"UTCP-PROXY-MCP: failed to register tool {tool_name}: {e}")
+        
+        logger.info(f"UTCP-PROXY-MCP: provider {provider_obj.name} registered with {new_tool_count} tools")
+
+    async def remove_provider(self, provider_name: str) -> None:
+        logger.info(f"UTCP-PROXY-MCP: deregistering provider {provider_name}")
+        
+        # First, identify tools for this provider
+        prefix = provider_name + "."
+        tools_to_remove = []
+        
+        for tool in self.tools:
+            tool_name = getattr(tool, 'name', None)
+            if tool_name and tool_name.startswith(prefix):
+                tools_to_remove.append(tool_name)
+        
+        # Remove tools from FastMCP
+        for tool_name in tools_to_remove:
+            try:
+                self.mcp.remove_tool(tool_name)
+                logger.info(f"UTCP-PROXY-MCP: removed MCP tool {tool_name}")
+            except Exception as e:
+                logger.warning(f"UTCP-PROXY-MCP: failed to remove MCP tool {tool_name}: {e}")
+        
+        # Deregister from UTCP
+        await self.client.deregister_tool_provider(provider_name)
+        
+        # Refresh proxy's tool and provider lists
+        self.tools = await self.client.tool_repository.get_tools()
+        self.providers = await self.client.tool_repository.get_providers()
+        
+        logger.info(f"UTCP-PROXY-MCP: provider {provider_name} deregistered, removed {len(tools_to_remove)} tools")
+
     async def cleanup(self) -> None:
         """Clean up resources"""
         if self.client:

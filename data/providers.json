@@ -7,15 +7,21 @@
     "content_type": "application/json"
   },
   {
-    "name": "openai",
-    "provider_type": "http",
-    "http_method": "GET",
-    "url": "https://raw.githubusercontent.com/openai/openai-openapi/refs/heads/manual_spec/openapi.yaml",
-    "content_type": "application/x-yaml"
-  },
-  {
-    "name": "newsapi",
-    "provider_type": "text",
-    "file_path": "./newsapi_manual.json"
+    "name": "notion-mcp",
+    "provider_type": "mcp",
+    "config": {
+      "mcpServers": {
+        "notion-mcp": {
+          "command": "npx",
+          "args": [
+            "-y",
+            "@notionhq/notion-mcp-server"
+          ],
+          "env": {
+            "OPENAPI_MCP_HEADERS": "{\"Authorization\": \"Bearer ...\", \"Notion-Version\": \"2022-06-28\" }"
+          }
+        }
+      }
+    }
   }
 ]

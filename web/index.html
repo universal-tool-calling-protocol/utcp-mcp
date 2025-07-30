@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UTCP-MCP Bridge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/lint.min.css">
+
     <style>
         body {
             margin: 0;
@@ -11,29 +16,34 @@
             background: #f4f6fa;
             color: #222;
         }
+
         .container {
             display: flex;
             height: 100vh;
         }
+
         .sidebar {
-            width: 250px;
+            width: 300px;
             background: #232946;
             color: #fff;
             padding: 24px 0;
-            box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
             display: flex;
             flex-direction: column;
         }
+
         .sidebar h2 {
             margin: 0 0 24px 24px;
             font-size: 1.3em;
             letter-spacing: 1px;
         }
+
         .provider-list {
             list-style: none;
             padding: 0 0 0 24px;
             margin: 0;
         }
+
         .provider-list li {
             margin-bottom: 16px;
             cursor: pointer;
@@ -41,31 +51,38 @@
             border-radius: 6px;
             transition: background 0.2s;
         }
-        .provider-list li.selected, .provider-list li:hover {
+
+        .provider-list li.selected,
+        .provider-list li:hover {
             background: #394867;
         }
+
         .main {
             flex: 1;
             padding: 32px 48px;
             overflow-y: auto;
         }
+
         .tools-header {
             font-size: 1.5em;
             margin-bottom: 18px;
         }
+
         .tool-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 24px;
         }
+
         .tool-card {
             background: #fff;
             border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
             padding: 20px 18px 16px 18px;
             display: flex;
             flex-direction: column;
         }
+
         .tool-card h3 {
             margin: 0 0 8px 0;
             font-size: 1.05em;
@@ -75,26 +92,165 @@
             overflow-wrap: anywhere;
             cursor: pointer;
         }
+
         .tool-card .desc {
             font-size: 0.98em;
             color: #555;
             margin-bottom: 10px;
         }
+
         .tool-card .inputs {
             font-size: 0.93em;
             color: #888;
         }
+
+        button {
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed !important;
+        }
+
+        /* --- Modal Styles --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.25);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 24px;
+            border-radius: 10px;
+            width: 70vw;
+            max-width: 1000px;
+            height: 70vh;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+        }
+
+        .modal-btn {
+            padding: 8px 20px;
+            border-radius: 6px;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95em;
+        }
+
+        #editProvidersBtn {
+            margin-right: 16px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: #394867;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        #editProvidersBtn:hover {
+            background: #2d3a5f;
+        }
+
+        #saveProvidersBtn {
+            background: #394867;
+            position: relative;
+        }
+        #saveProvidersBtn:hover:not(:disabled) {
+            background: #2d3a5f;
+        }
+        
+        .error-message {
+            color: #d8000c;
+            background-color: #ffcccc;
+            border: 1px solid #d8000c;
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.95em;
+            display: none; /* Hidden by default */
+        }
+        .error-message.show {
+            display: block;
+        }
+
+        /* --- CodeMirror Styles --- */
+        .editor-container {
+            flex-grow: 1; /* Allow editor to take up available space */
+            position: relative;
+            overflow: hidden; /* Constrain CodeMirror within this container */
+        }
+        
+        .CodeMirror {
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            height: 100%; /* Fill the container */
+            font-size: 14px;
+        }
+
+        /* --- Animations --- */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         @media (max-width: 700px) {
-            .container { flex-direction: column; }
-            .sidebar { width: 100%; flex-direction: row; padding: 12px 0; }
-            .main { padding: 18px 8px; }
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                padding: 12px 0;
+            }
+
+            .main {
+                padding: 18px 8px;
+            }
+
+            .modal-content {
+                width: 90vw;
+                height: 85vh;
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <aside class="sidebar">
-            <h2>Providers</h2>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <h2 style="margin-bottom:0;">Providers</h2>
+                <div>
+                    <button id="editProvidersBtn">Edit</button>
+                </div>
+            </div>
             <ul class="provider-list" id="providerList">
                 <li>Loading...</li>
             </ul>
@@ -106,12 +262,53 @@
             </div>
         </main>
     </div>
+
+    <div id="editProvidersModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit providers.json</h3>
+                <button id="saveProvidersBtn" class="modal-btn">
+                    <span id="saveButtonText">Save</span>
+                    <span id="saveButtonSpinner" style="display:none;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            style="animation:spin 1s linear infinite;">
+                            <path d="M21 12a9 9 0 11-6.219-8.56" />
+                        </svg>
+                    </span>
+                </button>
+            </div>
+            <div class="editor-container">
+                 <textarea id="providersJsonEditor">[]</textarea>
+            </div>
+            <div id="editProvidersError" class="error-message"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/lint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/json-lint.min.js"></script>
+    <script src="https://unpkg.com/jsonlint@1.6.3/web/jsonlint.js"></script>
+
     <script>
-        // Fetch providers and tools from backend
+        // --- State and DOM Elements ---
         let providers = [];
         let tools = [];
         let selectedProvider = null;
+        let cmEditor = null; // To hold the CodeMirror instance
 
+        const providerList = document.getElementById('providerList');
+        const toolList = document.getElementById('toolList');
+        const editProvidersBtn = document.getElementById('editProvidersBtn');
+        const editProvidersModal = document.getElementById('editProvidersModal');
+        const providersJsonEditorEl = document.getElementById('providersJsonEditor');
+        const editProvidersError = document.getElementById('editProvidersError');
+        const saveProvidersBtn = document.getElementById('saveProvidersBtn');
+        const saveButtonText = document.getElementById('saveButtonText');
+        const saveButtonSpinner = document.getElementById('saveButtonSpinner');
+
+        // --- API Functions ---
         async function fetchProviders() {
             const res = await fetch('/providers');
             if (!res.ok) return [];
@@ -126,38 +323,57 @@
             return data.tools || [];
         }
 
+        async function removeProvider(name) {
+            const res = await fetch(`/providers/${encodeURIComponent(name)}`, { method: 'DELETE' });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                alert(data.detail || 'Failed to remove provider');
+                return;
+            }
+            await refreshAll();
+        }
+
+        // --- Rendering Functions ---
         function renderProviders() {
-            const list = document.getElementById('providerList');
-            list.innerHTML = '';
+            providerList.innerHTML = '';
             providers.forEach(provider => {
                 const li = document.createElement('li');
-                li.textContent = provider.name || provider;
+                const providerName = provider.name || provider;
+                li.textContent = providerName;
                 li.onclick = () => {
-                    selectedProvider = provider.name || provider;
+                    selectedProvider = providerName;
                     renderProviders();
                     renderTools();
                 };
-                if ((provider.name || provider) === selectedProvider) {
+                if (providerName === selectedProvider) {
                     li.classList.add('selected');
                 }
-                list.appendChild(li);
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = '✕';
+                removeBtn.title = 'Remove provider';
+                removeBtn.style.cssText = 'margin-left:12px; background:#ff5555; color:#fff; border:none; border-radius:3px; cursor:pointer;';
+                removeBtn.onclick = async (e) => {
+                    e.stopPropagation();
+                    if (!confirm(`Remove provider '${provider.name}'?`)) return;
+                    await removeProvider(provider.name);
+                };
+                li.appendChild(removeBtn);
+                providerList.appendChild(li);
             });
         }
 
         function renderTools() {
-            const list = document.getElementById('toolList');
-            list.innerHTML = '';
+            toolList.innerHTML = '';
             let filtered = tools;
             if (selectedProvider) {
                 filtered = tools.filter(tool => {
-                    // Filter by tool name prefix: providerName. (dot)
                     if (!tool.name) return false;
                     const toolProvider = tool.name.split('.')[0];
                     return toolProvider === selectedProvider;
                 });
             }
             if (filtered.length === 0) {
-                list.innerHTML = '<div>No tools found for this provider.</div>';
+                toolList.innerHTML = '<div>No tools found for this provider.</div>';
                 return;
             }
             filtered.forEach(tool => {
@@ -168,22 +384,152 @@
                     <div class="desc">${tool.description || ''}</div>
                     <div class="inputs"><b>Inputs:</b> ${tool.inputs ? Object.keys(tool.inputs).join(', ') : 'None'}</div>
                 `;
-                list.appendChild(card);
+                toolList.appendChild(card);
             });
         }
 
-        async function init() {
-            // Fetch providers and tools
+        async function refreshAll() {
             providers = await fetchProviders();
             tools = await fetchTools();
-            if (providers.length > 0) {
+            if (providers.length > 0 && !providers.some(p => (p.name || p) === selectedProvider)) {
                 selectedProvider = providers[0].name || providers[0];
             }
             renderProviders();
             renderTools();
         }
 
-        window.onload = init;
+        // --- Edit Providers Modal Logic ---
+        function setSaveButtonLoading(isLoading) {
+            saveProvidersBtn.disabled = isLoading;
+            saveButtonText.style.display = isLoading ? 'none' : 'inline';
+            saveButtonSpinner.style.display = isLoading ? 'inline-block' : 'none';
+        }
+        
+        function showEditorError(message) {
+            editProvidersError.textContent = message;
+            editProvidersError.classList.add('show');
+        }
+
+        function clearEditorError() {
+            editProvidersError.textContent = '';
+            editProvidersError.classList.remove('show');
+        }
+
+        function closeModal() {
+            editProvidersModal.style.display = 'none';
+            clearEditorError();
+        }
+
+        function initializeCodeMirror() {
+            if (cmEditor) return; // Already initialized
+            cmEditor = CodeMirror.fromTextArea(providersJsonEditorEl, {
+                mode: { name: "javascript", json: true },
+                theme: "dracula",
+                lineNumbers: true,
+                gutters: ["CodeMirror-lint-markers"],
+                lint: true,
+                autoCloseBrackets: true,
+                matchBrackets: true,
+                lineWrapping: true, // Wrap long lines
+            });
+        }
+
+        editProvidersBtn.onclick = async () => {
+            try {
+                const res = await fetch('/providers');
+                if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch providers`);
+
+                const data = await res.json();
+                const providersJson = JSON.stringify(data.providers || [], null, 2);
+
+                editProvidersModal.style.display = 'flex';
+                initializeCodeMirror();
+                cmEditor.setValue(providersJson);
+                clearEditorError();
+                
+                // Refresh to ensure proper layout after being displayed
+                setTimeout(() => cmEditor.refresh(), 1); 
+
+            } catch (e) {
+                alert('Failed to load providers: ' + e.message);
+            }
+        };
+
+        saveProvidersBtn.onclick = async () => {
+            if (saveProvidersBtn.disabled) return;
+
+            let newProviders;
+            try {
+                newProviders = JSON.parse(cmEditor.getValue());
+                if (!Array.isArray(newProviders)) throw new Error('Must be a JSON array');
+            } catch (e) {
+                showEditorError('Invalid JSON: ' + e.message);
+                return;
+            }
+
+            clearEditorError();
+            setSaveButtonLoading(true);
+
+            try {
+                const res = await fetch('/providers', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newProviders)
+                });
+
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    showEditorError(data.detail || `HTTP ${res.status}: Failed to save providers.`);
+                    return;
+                }
+                const data = await res.json();
+
+                closeModal();
+                await refreshAll();
+
+                // Show feedback on the main edit button
+                const originalText = 'Edit';
+                if (data.changed === false) {
+                    editProvidersBtn.textContent = 'No changes';
+                    editProvidersBtn.style.background = '#6c757d';
+                } else {
+                    editProvidersBtn.textContent = 'Saved ✓';
+                    editProvidersBtn.style.background = '#28a745';
+                }
+                setTimeout(() => {
+                    editProvidersBtn.textContent = originalText;
+                    editProvidersBtn.style.background = '#394867';
+                }, 2000);
+
+            } catch (e) {
+                showEditorError('Network error: ' + e.message);
+            } finally {
+                setSaveButtonLoading(false);
+            }
+        };
+        
+        // --- Initialization and Event Listeners ---
+
+        // Close modal if user clicks outside of it
+        editProvidersModal.onclick = (e) => {
+            if (e.target === editProvidersModal && !saveProvidersBtn.disabled) {
+                closeModal();
+            }
+        };
+        
+        document.addEventListener('keydown', (e) => {
+            if (editProvidersModal.style.display === 'flex') {
+                if (e.key === 'Escape' && !saveProvidersBtn.disabled) {
+                    closeModal();
+                } else if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault(); // Prevent browser's save dialog
+                    if (!saveProvidersBtn.disabled) saveProvidersBtn.click();
+                }
+            }
+        });
+
+        window.onload = refreshAll;
     </script>
 </body>
+
 </html>

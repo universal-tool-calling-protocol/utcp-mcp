@@ -198,3 +198,7 @@ cython_debug/
 
 # Kiro
 .kiro
+
+# bash
+ingest.sh
+output.md
