@@ -23,7 +23,7 @@ $ErrorActionPreference = "Stop"
 
 # UTCP-MCP-Bridge Configuration
 $env:PROVIDERS_PATH = Join-Path $PSScriptRoot "data/providers.json"
-$env:HOST = "0.0.0.0"
+$env:HOST = "127.0.0.1"
 $env:FASTAPI_PORT = 8778
 $env:MCP_PROXY_PORT = 8777
 $env:MCP_CLIENT_PORT = 8776
