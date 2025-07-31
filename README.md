@@ -12,7 +12,7 @@ UTCP-MCP Bridge is a universal, all-in-one MCP server that brings the full power
 
 With UTCP-MCP Bridge, you only need to install one MCP server to access, manage, and extend your tool ecosystem—no matter how you want to use it.
 
-<img width="2263" height="976" alt="Untitled-2025-07-17-1210 excalidraw" src="https://github.com/user-attachments/assets/82d447b8-3f34-49f0-b62b-bd3c1826859e" />
+<img width="2263" height="976" alt="3mcp" src="https://github.com/user-attachments/assets/a6759512-1c0d-4265-9518-64916fbe1428" />
 
 ---
 
