@@ -22,7 +22,7 @@ It creates a virtual environment, installs dependencies, and launches the applic
 $ErrorActionPreference = "Stop"
 
 # UTCP-MCP-Bridge Configuration
-$env:PROVIDERS_PATH = "./data/providers.json"
+$env:PROVIDERS_PATH = Join-Path $PSScriptRoot "data/providers.json"
 $env:HOST = "0.0.0.0"
 $env:FASTAPI_PORT = 8778
 $env:MCP_PROXY_PORT = 8777
