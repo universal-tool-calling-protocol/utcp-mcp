@@ -28,12 +28,20 @@ Ensure you have Docker and Docker Compose installed.
 docker-compose up --build
 ```
 
-### 1.2 Run with Bash Script (Locally)
+### 1.2 Run with Bash Script
 
 Ensure you have Python 3 installed.
 
 ```bash
 ./run.sh
+```
+
+### 1.3 Run with PowerShell Script
+
+Ensure you have Python 3 installed.
+
+```bash
+./run.ps1
 ```
 
 This will:
@@ -48,6 +56,7 @@ This will:
 
 To connect your MCP client to the UTCP-MCP Bridge, add the following entries to your client's `mcp.json` (or equivalent configuration file):
 
+#### Cursor example:
 ```json
 {
   "mcpServers": {
@@ -59,6 +68,23 @@ To connect your MCP client to the UTCP-MCP Bridge, add the following entries to 
       "url": "http://localhost:8776/utcp-client"
     }
   }
+}
+```
+#### VS Code example:
+```json
+{
+	"servers": {
+    // any other mcp servers
+		"utcp-proxy-mcp-local": {
+			"url": "http://localhost:8777/utcp-proxy",
+			"type": "http"
+		},
+		"utcp-client-mcp-local": {
+			"url": "http://localhost:8776/utcp-client",
+			"type": "http"
+		}
+	},
+	"inputs": []
 }
 ```
 

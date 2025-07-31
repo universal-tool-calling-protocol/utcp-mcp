@@ -8,7 +8,7 @@ services:
       - "8778:8778"
     environment:
       - PROVIDERS_PATH=/app/data/providers.json
-      - HOST=0.0.0.0
+      - HOST=127.0.0.1
       - FASTAPI_PORT=8778
       - MCP_PROXY_PORT=8777
       - MCP_CLIENT_PORT=8776

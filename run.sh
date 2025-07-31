@@ -4,7 +4,7 @@ set -e  # Exit on any error
 
 # UTCP-MCP-Bridge Configuration
 export PROVIDERS_PATH=./data/providers.json
-export HOST=0.0.0.0
+export HOST=127.0.0.1
 export FASTAPI_PORT=8778
 export MCP_PROXY_PORT=8777
 export MCP_CLIENT_PORT=8776
