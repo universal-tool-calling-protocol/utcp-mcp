@@ -182,7 +182,7 @@ async def search_tools(query: str, limit: int = 10) -> Dict[str, Any]:
     
     try:
         tools = await client.search_tools(query, limit)
-        return {"tools": [tool.model_dump() for tool in tools]}
+        return {"tools": [{"name": tool.name, "description": tool.description, "input_schema": tool.inputs.model_dump(exclude_none=True)} for tool in tools]}
     except Exception as e:
         return {"error": str(e)}
 
@@ -232,6 +232,40 @@ async def get_required_variables_for_tool(tool_name: str) -> Dict[str, Any]:
             "success": True,
             "tool_name": tool_name,
             "required_variables": variables
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+
+@mcp.tool()
+async def tool_info(tool_name: str) -> Dict[str, Any]:
+    """Get complete information about a specific tool including all details using model_dump().
+    
+    Args:
+        tool_name: Name of the tool to get complete information for
+        
+    Returns:
+        Dictionary with success status and complete tool information with model_dump()
+    """
+    client = await initialize_utcp_client()
+    
+    try:
+        # Search for the specific tool
+        tool = await client.tool_repository.get_tool(tool_name)
+        
+        if not tool:
+            return {
+                "success": False,
+                "error": f"Tool '{tool_name}' not found"
+            }
+        
+        # Return complete tool information with model_dump()
+        return {
+            "success": True,
+            "tool": tool.model_dump()
         }
     except Exception as e:
         return {
