@@ -31,6 +31,7 @@ pipx install uv
 pip install uv
 
 # Or follow the official installation guide above
+```
 
 ### 2. Download the client script
 Download the `simple-utcp-client-mcp.py` file to your desired location.
