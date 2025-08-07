@@ -34,7 +34,7 @@ pip install uv
 ```
 
 ### 2. Download the client script
-Download the `simple-utcp-client-mcp.py` file to your desired location.
+Download the [`simple-utcp-client-mcp.py`](https://github.com/universal-tool-calling-protocol/utcp-mcp/blob/main/simple-utcp-client-mcp.py) file to your desired location.
 
 ### 3. Configure your MCP client
 Add the following configuration to your MCP client:
