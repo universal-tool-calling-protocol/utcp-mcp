@@ -20,10 +20,22 @@ With UTCP-MCP Bridge, you only need to install one MCP server to access, manage,
 
 For a quick standalone setup using just the UTCP client MCP:
 
-### 1. Download the client script
+### 1. Install uv
+Ensure you have [uv](https://docs.astral.sh/uv/getting-started/installation/) installed on your system. You can install it via:
+
+```bash
+# Using pipx (recommended)
+pipx install uv
+
+# Using pip
+pip install uv
+
+# Or follow the official installation guide above
+
+### 2. Download the client script
 Download the `simple-utcp-client-mcp.py` file to your desired location.
 
-### 2. Configure your MCP client
+### 3. Configure your MCP client
 Add the following configuration to your MCP client:
 
 ```json
@@ -41,7 +53,7 @@ Add the following configuration to your MCP client:
 }
 ```
 
-### 3. Optional configuration
+### 4. Optional configuration
 Create a `.utcp_config.json` file in the same directory as the python script to:
 - Set environment variables (optional)
 - Register providers on startup (optional)
