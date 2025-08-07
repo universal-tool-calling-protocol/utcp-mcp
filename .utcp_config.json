@@ -1,0 +1,9 @@
+{
+    "providers_file_path": "path\\to\\providers.json",
+    "load_variables_from": [
+        {
+            "type": "dotenv",
+            "env_file_path": "path\\to\\.env"
+        }
+    ]
+}

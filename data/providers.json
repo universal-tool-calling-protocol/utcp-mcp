@@ -1,27 +1,14 @@
 [
   {
-    "name": "openlibrary",
-    "provider_type": "http",
-    "http_method": "GET",
-    "url": "https://openlibrary.org/static/openapi.json",
-    "content_type": "application/json"
+      "name": "openlibrary",
+      "provider_type": "http",
+      "http_method": "GET",
+      "url": "https://openlibrary.org/static/openapi.json",
+      "content_type": "application/json"
   },
   {
-    "name": "notion-mcp",
-    "provider_type": "mcp",
-    "config": {
-      "mcpServers": {
-        "notion-mcp": {
-          "command": "npx",
-          "args": [
-            "-y",
-            "@notionhq/notion-mcp-server"
-          ],
-          "env": {
-            "OPENAPI_MCP_HEADERS": "{\"Authorization\": \"Bearer ...\", \"Notion-Version\": \"2022-06-28\" }"
-          }
-        }
-      }
-    }
+      "name": "newsapi",
+      "provider_type": "text",
+      "file_path": "./newsapi_manual.json"
   }
 ]

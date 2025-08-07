@@ -16,6 +16,57 @@ With UTCP-MCP Bridge, you only need to install one MCP server to access, manage,
 
 ---
 
+## Quick Setup (Standalone)
+
+For a quick standalone setup using just the UTCP client MCP:
+
+### 1. Download the client script
+Download the `simple-utcp-client-mcp.py` file to your desired location.
+
+### 2. Configure your MCP client
+Add the following configuration to your MCP client:
+
+```json
+{
+  "mcpServers": {
+    "simple-utcp-client-mcp": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--script",
+        "path\\to\\simple-utcp-client-mcp.py"
+      ]
+    }
+  }
+}
+```
+
+### 3. Optional configuration
+Create a `.utcp_config.json` file in the same directory as the python script to:
+- Set environment variables (optional)
+- Register providers on startup (optional)
+- Load variables from .env files (optional)
+
+Example `.utcp_config.json`:
+```json
+{
+    "variables": {
+        "example_var": "value"
+    },
+    "providers_file_path": "path\\to\\providers.json",
+    "load_variables_from": [
+        {
+            "type": "dotenv",
+            "env_file_path": "path\\to\\.env"
+        }
+    ]
+}
+```
+
+---
+
+## Full Project Setup
+
 ## Getting Started
 
 You can run the UTCP-MCP Bridge in two ways: using Docker or a local bash script.
@@ -117,6 +168,8 @@ Web Interface to view and manage providers and tools is accessible in any browse
 - `/providers` – List available providers
 
 ---
+
+
 
 ## Dependencies
 
