@@ -2,3 +2,7 @@ utcp
 fastmcp
 fastapi
 python-dotenv
+utcp-http
+utcp-mcp
+utcp-text
+utcp-cli

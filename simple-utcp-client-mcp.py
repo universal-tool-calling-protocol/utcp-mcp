@@ -1,7 +1,11 @@
 # /// script
 # dependencies = [
 #   "fastmcp",
-#   "utcp==0.2.1",
+#   "utcp==1.0.1",
+#   "utcp-mcp==1.0.1",
+#   "utcp-text==1.0.1",
+#   "utcp-cli==1.0.1",
+#   "utcp-http==1.0.1",
 # ]
 # ///
 """FastMCP stdio server that proxies UTCP client functionalities as tools.
@@ -18,51 +22,22 @@ The server automatically loads providers from a 'providers.json' file in the sam
 
 import asyncio
 import json
-import os
-import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional
 
 from fastmcp import FastMCP
 from pydantic import BaseModel, Field
 
 # UTCP imports
-from utcp.client.utcp_client import UtcpClient
-from utcp.shared.provider import Provider, HttpProvider, CliProvider, ProviderType, SSEProvider, \
-    StreamableHttpProvider, WebSocketProvider, GRPCProvider, GraphQLProvider, \
-    TCPProvider, UDPProvider, WebRTCProvider, MCPProvider, TextProvider
-from utcp.shared.tool import ProviderUnion, Tool
-from utcp.client.utcp_client_config import UtcpVariableNotFound
-from utcp.client.utcp_client_config import UtcpClientConfig
+from utcp.utcp_client import UtcpClient
+from utcp.data.utcp_client_config import UtcpClientConfig
+from utcp.data.call_template import CallTemplate
 
 # Global UTCP client instance
 utcp_client: Optional[UtcpClient] = None
 
 # Initialize FastMCP server
 mcp = FastMCP("UTCP Client MCP Server")
-
-
-class ToolCallInput(BaseModel):
-    """Input model for tool calls."""
-    tool_name: str = Field(description="Name of the tool to call (format: provider.tool_name)")
-    arguments: Dict[str, Any] = Field(description="Arguments to pass to the tool")
-
-
-class SearchToolsInput(BaseModel):
-    """Input model for tool search."""
-    query: str = Field(description="Search query for finding tools")
-    limit: int = Field(default=10, description="Maximum number of tools to return (0 for no limit)")
-
-
-class LoadProvidersInput(BaseModel):
-    """Input model for loading providers from file."""
-    providers_file_path: str = Field(description="Path to the providers JSON file")
-
-
-class GetVariablesInput(BaseModel):
-    """Input model for getting required variables."""
-    tool_name: str = Field(description="Name of the tool to get variables for")
-
 
 async def initialize_utcp_client():
     """Initialize the UTCP client and try to load providers.json from the same directory."""
@@ -87,11 +62,11 @@ async def initialize_utcp_client():
 
 
 @mcp.tool()
-async def register_tool_provider(provider: ProviderUnion) -> Dict[str, Any]:
+async def register_manual(manual_call_template: CallTemplate) -> Dict[str, Any]:
     """Register a new tool provider with the UTCP client.
     
     Args:
-        provider_input: Provider configuration including type, name, and data
+        manual_call_template: Call template to the endpoint of a UTCP Manual
         
     Returns:
         Dictionary with success status and list of registered tools
@@ -99,11 +74,11 @@ async def register_tool_provider(provider: ProviderUnion) -> Dict[str, Any]:
     client = await initialize_utcp_client()
     
     try:
-        tools = await client.register_tool_provider(provider)
+        tools = await client.register_manual(manual_call_template)
         
         return {
             "success": True,
-            "provider_name": provider.name,
+            "manual_name": manual_call_template.name,
             "tools_registered": len(tools),
             "tool_names": [tool.name for tool in tools]
         }
@@ -115,11 +90,11 @@ async def register_tool_provider(provider: ProviderUnion) -> Dict[str, Any]:
 
 
 @mcp.tool()
-async def deregister_tool_provider(provider_name: str) -> Dict[str, Any]:
+async def deregister_manual(manual_name: str) -> Dict[str, Any]:
     """Deregister a tool provider from the UTCP client.
     
     Args:
-        provider_name: Name of the provider to deregister
+        manual_name: Name of the manual to deregister
         
     Returns:
         Dictionary with success status
@@ -127,10 +102,10 @@ async def deregister_tool_provider(provider_name: str) -> Dict[str, Any]:
     client = await initialize_utcp_client()
     
     try:
-        await client.deregister_tool_provider(provider_name)
+        await client.deregister_manual(manual_name)
         return {
             "success": True,
-            "message": f"Provider '{provider_name}' deregistered successfully"
+            "message": f"Manual '{manual_name}' deregistered successfully"
         }
     except Exception as e:
         return {
@@ -168,11 +143,11 @@ async def call_tool(tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]
 
 
 @mcp.tool()
-async def search_tools(query: str, limit: int = 10) -> Dict[str, Any]:
+async def search_tools(task_description: str, limit: int = 10) -> Dict[str, Any]:
     """Search for tools using a query string.
     
     Args:
-        query: Search query
+        task_description: Description of the task to search for tools
         limit: Optional limit on the number of tools to return
         
     Returns:
@@ -181,41 +156,14 @@ async def search_tools(query: str, limit: int = 10) -> Dict[str, Any]:
     client = await initialize_utcp_client()
     
     try:
-        tools = await client.search_tools(query, limit)
+        tools = await client.search_tools(task_description, limit)
         return {"tools": [{"name": tool.name, "description": tool.description, "input_schema": tool.inputs.model_dump(exclude_none=True)} for tool in tools]}
     except Exception as e:
         return {"error": str(e)}
 
 
 @mcp.tool()
-async def load_providers_from_file(providers_file_path: str) -> Dict[str, Any]:
-    """Load providers from a JSON file.
-    
-    Args:
-        providers_file_path: Path to the providers JSON file
-        
-    Returns:
-        Dictionary with success status and loaded providers
-    """
-    client = await initialize_utcp_client()
-    
-    try:
-        providers = await client.load_providers(providers_file_path)
-        return {
-            "success": True,
-            "providers_file": providers_file_path,
-            "providers_loaded": len(providers),
-            "provider_names": [provider.name for provider in providers]
-        }
-    except Exception as e:
-        return {
-            "success": False,
-            "error": str(e)
-        }
-
-
-@mcp.tool()
-async def get_required_variables_for_tool(tool_name: str) -> Dict[str, Any]:
+async def get_required_keys_for_tool(tool_name: str) -> Dict[str, Any]:
     """Get required environment variables for a registered tool.
     
     Args:
@@ -227,7 +175,7 @@ async def get_required_variables_for_tool(tool_name: str) -> Dict[str, Any]:
     client = await initialize_utcp_client()
     
     try:
-        variables = await client.get_required_variables_for_tool(tool_name)
+        variables = await client.get_required_variables_for_registered_tool(tool_name)
         return {
             "success": True,
             "tool_name": tool_name,
@@ -254,7 +202,7 @@ async def tool_info(tool_name: str) -> Dict[str, Any]:
     
     try:
         # Search for the specific tool
-        tool = await client.tool_repository.get_tool(tool_name)
+        tool = await client.config.tool_repository.get_tool(tool_name)
         
         if not tool:
             return {

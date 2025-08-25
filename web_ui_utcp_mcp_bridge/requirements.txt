@@ -1,0 +1,4 @@
+utcp==0.2.1
+fastmcp
+fastapi
+python-dotenv

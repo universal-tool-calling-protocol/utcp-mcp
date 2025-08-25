@@ -9,6 +9,6 @@
   {
       "name": "newsapi",
       "provider_type": "text",
-      "file_path": "./newsapi_manual.json"
+      "file_path": "C:\\Users\\razva\\Documents\\Startup\\utcp\\utcp-mcp\\data\\newsapi_manual.json"
   }
 ]
