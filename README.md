@@ -20,21 +20,27 @@ With UTCP-MCP Bridge, you only need to install one MCP server to access, manage,
 
 For a quick standalone setup using just the UTCP client MCP:
 
-### 1. Install uv
-Ensure you have [uv](https://docs.astral.sh/uv/getting-started/installation/) installed on your system. You can install it via:
+### 1. Install uv (Python) or bun (TypeScript)
+Ensure you have [uv](https://docs.astral.sh/uv/getting-started/installation/) or [bun](https://bun.com/docs/installation) installed on your system. You can install it via:
 
 ```bash
-# Using pipx (recommended)
+# Using pipx (recommended for Python)
 pipx install uv
 
 # Using pip
 pip install uv
 
+# Using bun (recommeneded for JS)
+curl -fsSL https://bun.com/install | bash
+
 # Or follow the official installation guide above
 ```
 
 ### 2. Download the client script
-Download the [`simple-utcp-client-mcp.py`](https://github.com/universal-tool-calling-protocol/utcp-mcp/blob/main/simple-utcp-client-mcp.py) file to your desired location.
+Download either:
+- The [`utcp-client-mcp.py`](https://github.com/universal-tool-calling-protocol/utcp-mcp/blob/main/utcp-client-mcp.py) file for Python, or
+- The [`utcp-client-mcp.ts`](https://github.com/universal-tool-calling-protocol/utcp-mcp/blob/main/utcp-client-mcp.ts) file for Bun TypeScript
+
 
 ### 3. Configure your MCP client
 Add the following configuration to your MCP client:
@@ -42,12 +48,11 @@ Add the following configuration to your MCP client:
 ```json
 {
   "mcpServers": {
-    "simple-utcp-client-mcp": {
-      "command": "uv",
+    "utcp-client-mcp": {
+      "command": "uv || bun",
       "args": [
         "run",
-        "--script",
-        "path\\to\\simple-utcp-client-mcp.py"
+        "path\\to\\utcp-client-mcp.[py|ts]"
       ]
     }
   }
