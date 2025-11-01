@@ -7,6 +7,11 @@ import path from "path";
 import { promises as fs } from "fs";
 import { parse as parseDotEnv } from 'dotenv';
 
+import "@utcp/http";
+import "@utcp/text";
+import "@utcp/mcp";
+import "@utcp/cli";
+
 import {
     UtcpClient,
     CallTemplateSchema,
