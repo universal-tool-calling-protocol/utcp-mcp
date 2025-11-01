@@ -39,7 +39,7 @@ curl -fsSL https://bun.com/install | bash
 ### 2. Download the client script
 Download either:
 - The [`utcp-client-mcp.py`](https://github.com/universal-tool-calling-protocol/utcp-mcp/blob/main/utcp-client-mcp.py) file for Python, or
-- The [`utcp-client-mcp.ts`](https://github.com/universal-tool-calling-protocol/utcp-mcp/blob/main/utcp-client-mcp.ts) file for Bun TypeScript
+- The [`utcp-client-mcp.ts`](https://github.com/universal-tool-calling-protocol/utcp-mcp/blob/main/utcp-client-mcp.ts) file and its associated `package.json` for TypeScript
 
 
 ### 3. Configure your MCP client
