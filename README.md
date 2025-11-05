@@ -1,74 +1,37 @@
 # UTCP-MCP Bridge
 
-## Overview
-
 **The last MCP server you'll ever need.**
 
-UTCP-MCP Bridge is a universal, all-in-one MCP server that brings the full power of the Universal Tool Calling Protocol (UTCP) to the MCP ecosystem. With this project, you can:
+A universal, all-in-one MCP server that brings the full power of the Universal Tool Calling Protocol (UTCP) to the MCP ecosystem.
 
-- **Use the UTCP client directly:** Register and deregister UTCP manuals, search and call tools — unlocking the main functions of the UTCP client from a single place.
-- **Use UTCP as a proxy:** Instantly expose all tools registered via UTCP as MCP-compatible tools, making them available to any MCP client. Available in the web interface
-- **Web interface:** Easily manage your tools and manuals through a user-friendly web UI. Register and deregister manuals, enable and disable tools, and much more — all with just a few clicks. More features are coming soon! The web-ui is a bit more complex, check out its readme and setup instructions here: [web_ui_utcp_mcp_bridge/README.md](web_ui_utcp_mcp_bridge/README.md)
+## 🚀 Quick Start
 
-With UTCP-MCP Bridge, you only need to install one MCP server to access, manage, and extend your tool ecosystem—no matter how you want to use it.
-
-<img width="2263" height="976" alt="3mcp" src="https://github.com/user-attachments/assets/a6759512-1c0d-4265-9518-64916fbe1428" />
-
----
-
-## Quick Setup (Standalone)
-
-For a quick standalone setup using just the UTCP client MCP:
-
-### 1. Install uv (Python) or bun (TypeScript)
-Ensure you have [uv](https://docs.astral.sh/uv/getting-started/installation/) or [bun](https://bun.com/docs/installation) installed on your system. You can install it via:
-
-```bash
-# Using pipx (recommended for Python)
-pipx install uv
-
-# Using pip
-pip install uv
-
-# Using bun (recommeneded for JS)
-curl -fsSL https://bun.com/install | bash
-
-# Or follow the official installation guide above
-```
-
-### 2. Download the client script
-Download either:
-- The [`utcp-client-mcp.py`](https://github.com/universal-tool-calling-protocol/utcp-mcp/blob/main/utcp-client-mcp.py) file for Python, or
-- The [`utcp-client-mcp.ts`](https://github.com/universal-tool-calling-protocol/utcp-mcp/blob/main/utcp-client-mcp.ts) file and its associated `package.json` for TypeScript
-
-
-### 3. Configure your MCP client
-Add the following configuration to your MCP client:
+Add this configuration to your MCP client (Claude Desktop, etc.):
 
 ```json
 {
   "mcpServers": {
-    "utcp-client-mcp": {
-      "command": "uv || bun",
-      "args": [
-        "run",
-        "path\\to\\utcp-client-mcp.[py|ts]"
-      ]
+    "utcp": {
+      "command": "npx",
+      "args": ["@utcp/mcp-bridge"],
+      "env": {
+        "UTCP_CONFIG_FILE": "/path/to/your/.utcp_config.json"
+      }
     }
   }
 }
 ```
 
-### 4. Optional configuration
-Create a `.utcp_config.json` file in the same directory as the python script to:
-- Set environment variables (optional)
-- Register manuals on startup (optional)
-- Load variables from .env files (optional)
-- Add custom post processing steps (optional)
-- Use custom tool repositories (optional)
-- Use custom tool search strategies (optional)
+**That's it!** No installation required. The bridge will automatically:
+- Download and run the latest version via npx
+- Load your UTCP configuration from the specified path
+- Register all your UTCP manuals as MCP tools
+- Provide a unified interface to manage your tool ecosystem
 
-Example `.utcp_config.json`:
+## 🔧 Configuration
+
+Create a `.utcp_config.json` file to configure your tools and services:
+
 ```json
 {
     "load_variables_from": [
@@ -81,7 +44,7 @@ Example `.utcp_config.json`:
       {
           "name": "openlibrary",
           "call_template_type": "http",
-          "http_method": "GET",
+          "http_method": "GET", 
           "url": "https://openlibrary.org/static/openapi.json",
           "content_type": "application/json"
       }
@@ -89,8 +52,8 @@ Example `.utcp_config.json`:
     "post_processing": [
       {
           "tool_post_processor_type": "filter_dict",
-          "only_include_keys": ["name", "key"],
-          "only_include_tools": ["openlibrary.read_search_authors_json_search_authors_json_get"]
+          "only_include_keys": ["name", "description"],
+          "only_include_tools": ["openlibrary.*"]
       }
     ],
     "tool_repository": {
@@ -99,5 +62,48 @@ Example `.utcp_config.json`:
     "tool_search_strategy": {
       "tool_search_strategy_type": "tag_and_description_word_match"
     }
-  }
+}
 ```
+
+## 🛠️ Available MCP Tools
+
+The bridge exposes these MCP tools for managing your UTCP ecosystem:
+
+- **`register_manual`** - Register new UTCP manuals/APIs
+- **`deregister_manual`** - Remove registered manuals
+- **`call_tool`** - Execute any registered UTCP tool
+- **`search_tools`** - Find tools by description
+- **`list_tools`** - List all registered tool names
+- **`get_required_keys_for_tool`** - Get required environment variables
+- **`tool_info`** - Get complete tool information and schema
+
+## 📁 What is UTCP?
+
+The Universal Tool Calling Protocol (UTCP) allows you to:
+- **Connect to any API** via HTTP, OpenAPI specs, or custom formats
+- **Use command-line tools** with automatic argument parsing
+- **Process text and files** with built-in utilities
+- **Chain and combine** multiple tools seamlessly
+
+With this MCP bridge, all your UTCP tools become available in Claude Desktop and other MCP clients.
+
+## 🌟 Features
+
+- ✅ **Zero installation** - Works via npx
+- ✅ **Universal compatibility** - Works with any MCP client
+- ✅ **Dynamic configuration** - Update tools without restarting
+- ✅ **Environment isolation** - Each project can have its own config
+- ✅ **Comprehensive tool management** - Register, search, call, and inspect tools
+- ✅ **Web interface available** - See [web_ui_utcp_mcp_bridge/](web_ui_utcp_mcp_bridge/)
+
+## 🐍 Python Version
+
+For Python users, see the standalone Python implementation in [`python_mcp_bridge/`](python_mcp_bridge/)
+
+## 🌐 Web Interface
+
+For advanced management with a web UI, check out [`web_ui_utcp_mcp_bridge/`](web_ui_utcp_mcp_bridge/)
+
+---
+
+<img width="2263" height="976" alt="UTCP MCP Bridge Interface" src="https://github.com/user-attachments/assets/a6759512-1c0d-4265-9518-64916fbe1428" />
