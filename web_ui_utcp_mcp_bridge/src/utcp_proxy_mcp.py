@@ -83,10 +83,10 @@ class UTCPProxy:
         for py_name_safe, orig_name in param_map.items():
             func_code += f"    if {py_name_safe} is not None:\n"
             func_code += f"        args['{orig_name}'] = {py_name_safe}\n"
-        func_code += f"    return await bridge.client.call_tool('{get(tool, 'name')}', args)\n"
+        func_code += f"    return await client.call_tool('{get(tool, 'name')}', args)\n"
 
         # Create function
-        namespace = {"bridge": self}
+        namespace = { "client": self.client }
         exec(func_code, globals(), namespace)
         proxy_func = namespace["proxy"]
         proxy_func.__name__ = get(tool, 'name', 'utcp_tool').replace('.', '_')
