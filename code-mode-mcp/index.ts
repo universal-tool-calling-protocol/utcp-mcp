@@ -194,12 +194,17 @@ Remember: The power of this system comes from combining multiple tools in sophis
         inputSchema: {
             code: z.string().describe("TypeScript code to execute with access to all registered tools."),
             timeout: z.number().optional().default(30000).describe("Optional timeout in milliseconds (default: 30000)."),
+            max_output_size: z.number().optional().default(200000).describe("Optional maximum output size in characters (default: 200000)."),
         },
     }, async (input) => {
         const client = await initializeUtcpClient();
         try {
-            const result = await client.callToolChain(input.code, input.timeout);
-            return { content: [{ type: "text", text: JSON.stringify({ success: true, result }) }] };
+            const { result, logs } = await client.callToolChain(input.code, input.timeout);
+            const content = JSON.stringify({ success: true, result, logs })
+            if (content.length > input.max_output_size) {
+                return { content: [{ type: "text", text: content.slice(0, input.max_output_size) + "...\nmax_output_size exceeded" }] };
+            }
+            return { content: [{ type: "text", text: content }] };
         } catch (e: any) {
             return { content: [{ type: "text", text: JSON.stringify({ success: false, error: e.message }) }] };
         }
