@@ -1,0 +1,24 @@
+{
+    "manual_call_templates": [
+        {
+            "call_template_type": "http",
+            "name": "weather_api",
+            "url": "https://api.weather.example.com/tools",
+            "http_method": "GET"
+        },
+        {
+            "call_template_type": "mcp",
+            "name": "file_tools",
+            "command": "python3",
+            "args": [
+                "mcp_server.py"
+            ]
+        }
+    ],
+    "load_variables_from": [
+        {
+            "variable_loader_type": "dotenv",
+            "env_file_path": ".env"
+        }
+    ]
+}
