@@ -1,5 +1,5 @@
 [package]
-name = "rs-utcp-bridge"
+name = "mcp-bridge-rs-utcp"
 version = "1.0.0"
 edition = "2021"
 description = "MCP bridge for Rust UTCP - exposes UTCP tools as MCP tools"
