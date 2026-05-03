@@ -29,6 +29,7 @@ import {
     UtcpClientConfigSerializer
 } from "@utcp/sdk";
 import type { UtcpClientConfig } from "@utcp/sdk";
+import { ContentBlock, ContentBlockSchema } from "@modelcontextprotocol/sdk/types.js";
 
 // Get current file directory for Node.js ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -91,7 +92,35 @@ function setupMcpTools() {
         const client = await initializeUtcpClient();
         try {
             const result = await client.callTool(input.tool_name, input.arguments);
-            return { content: [{ type: "text", text: JSON.stringify({ success: true, tool_name: input.tool_name, result }) }] };
+
+            // Pass MCP content blocks (image, resource, etc.) through to the
+            // client natively instead of JSON-stringifying them, which would
+            // turn binary payloads into raw base64 text and bloat the
+            // conversation. Mirrors @utcp/code-mode-mcp's call_tool_chain.
+            const content: Array<ContentBlock> = [];
+            const nonMcp: Array<any> = [];
+
+            if (Array.isArray(result)) {
+                for (const item of result) {
+                    if (ContentBlockSchema.safeParse(item).success) {
+                        content.push(item as ContentBlock);
+                    } else {
+                        nonMcp.push(item);
+                    }
+                }
+            } else if (ContentBlockSchema.safeParse(result).success) {
+                content.push(result as ContentBlock);
+            } else {
+                nonMcp.push(result);
+            }
+
+            const plain = nonMcp.length > 1 ? nonMcp : nonMcp[0];
+            content.push({
+                type: "text",
+                text: JSON.stringify({ success: true, tool_name: input.tool_name, result: plain }),
+            });
+
+            return { content };
         } catch (e: any) {
             return { content: [{ type: "text", text: JSON.stringify({ success: false, error: e.message }) }] };
         }
