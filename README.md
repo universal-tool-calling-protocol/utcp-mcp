@@ -65,6 +65,41 @@ Create a `.utcp_config.json` file to configure your tools and services:
 }
 ```
 
+### Claude Code (CLI)
+
+For [Claude Code](https://claude.com/claude-code) (the CLI / IDE extension), register the bridge as a user-scoped MCP server:
+
+```bash
+claude mcp add-json --scope user utcp '{"type":"stdio","command":"npx","args":["@utcp/mcp-bridge"],"env":{"UTCP_CONFIG_FILE":"/absolute/path/to/.utcp_config.json"}}'
+```
+
+Then restart Claude Code. Verify with `claude mcp list`. Remove with `claude mcp remove utcp --scope user`.
+
+## 🧪 Local development against the bridge
+
+If you're hacking on `@utcp/sdk` or any other [typescript-utcp](https://github.com/universal-tool-calling-protocol/typescript-utcp) package and want to exercise it through Claude Code, use the dev scripts:
+
+```bash
+cd utcp-mcp
+npm install
+npm run dev:register     # builds typescript-utcp packages, overlays each into the bridge's node_modules, builds the bridge, and registers it as 'utcp-dev' in Claude Code
+# restart Claude Code
+
+# After every edit:
+npm run dev:register     # rebuilds, re-registers; restart Claude Code
+
+# When done:
+npm run dev:unregister   # removes the MCP entry and restores registry node_modules
+```
+
+Both scripts are idempotent and never mutate `package.json`. The overlay strategy avoids `npm link`, which under modern npm aliases `unlink` to `uninstall --save` and would silently strip the dependency.
+
+The script expects the typescript-utcp checkout to live next to this repo (`../typescript-utcp`). Override with flags if not:
+
+- `--lib-dir <path>` — point at a different typescript-utcp checkout, or pass `none` to skip the overlay step entirely (useful when only editing the bridge)
+- `--name <mcp-name>` (default `utcp-dev`) — useful if you want the dev bridge alongside a published one
+- `--config <path>` (default `./.utcp_config.json`) — point at a different UTCP config
+
 ## 🛠️ Available MCP Tools
 
 The bridge exposes these MCP tools for managing your UTCP ecosystem:

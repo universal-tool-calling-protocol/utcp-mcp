@@ -1,10 +1,11 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "utcp-mcp",
       "dependencies": {
-        "@modelcontextprotocol/sdk": "^1.20.2",
+        "@modelcontextprotocol/sdk": "~1.20.2",
         "@utcp/cli": "^1.0.12",
         "@utcp/dotenv-loader": "^1.0.0",
         "@utcp/file": "^1.0.0",
