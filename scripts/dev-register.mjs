@@ -36,6 +36,16 @@ const configPath = path.resolve(bridgeDir, getArg("--config", ".utcp_config.json
 const libDirArg = getArg("--lib-dir", "../typescript-utcp");
 const libDir = libDirArg === "none" ? null : path.resolve(bridgeDir, libDirArg);
 
+// Validate --name against the same character set Claude Code's managed-server
+// schema accepts ([a-zA-Z0-9_-]). The value is later interpolated into a shell
+// command string (because Windows .cmd shims require shell: true and cmd.exe
+// won't strip our JSON quoting otherwise), so anything outside this set could
+// break out of the argument and execute attacker-supplied commands.
+if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
+  console.error(`✗ Invalid --name '${name}'. Must match [a-zA-Z0-9_-]+.`);
+  process.exit(1);
+}
+
 if (!existsSync(configPath)) {
   console.error(`✗ Config file not found: ${configPath}`);
   console.error(`  Pass --config <path> or create one at ${configPath}.`);

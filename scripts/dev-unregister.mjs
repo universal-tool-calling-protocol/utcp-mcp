@@ -21,21 +21,48 @@ const getArg = (flag, fallback) => {
 
 const name = getArg("--name", "utcp-dev");
 
-function run(cmd, cmdArgs, opts = {}) {
-  console.log(`> ${cmd} ${cmdArgs.join(" ")}  (in ${opts.cwd ?? process.cwd()})`);
-  spawnSync(cmd, cmdArgs, { stdio: "inherit", shell: true, ...opts });
+if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
+  console.error(`✗ Invalid --name '${name}'. Must match [a-zA-Z0-9_-]+.`);
+  process.exit(1);
 }
 
-run("claude", ["mcp", "remove", name, "--scope", "user"]);
+let hadFailure = false;
+
+// `claude mcp remove` is allowed to fail (entry may already be gone) — log
+// but don't abort the rest of the cleanup. Other steps must succeed for the
+// success message to be honest.
+function tryRun(cmd, cmdArgs, opts = {}) {
+  console.log(`> ${cmd} ${cmdArgs.join(" ")}  (in ${opts.cwd ?? process.cwd()})`);
+  const r = spawnSync(cmd, cmdArgs, { stdio: "inherit", shell: true, ...opts });
+  if (r.status !== 0) {
+    console.warn(`⚠ ${cmd} ${cmdArgs[0] ?? ""} exited ${r.status}; continuing.`);
+  }
+}
+
+function mustRun(cmd, cmdArgs, opts = {}) {
+  console.log(`> ${cmd} ${cmdArgs.join(" ")}  (in ${opts.cwd ?? process.cwd()})`);
+  const r = spawnSync(cmd, cmdArgs, { stdio: "inherit", shell: true, ...opts });
+  if (r.status !== 0) {
+    console.error(`✗ ${cmd} ${cmdArgs[0] ?? ""} failed (exit ${r.status}).`);
+    hadFailure = true;
+  }
+}
+
+tryRun("claude", ["mcp", "remove", name, "--scope", "user"]);
 
 // Prefer bun to match this repo's native package manager (bun.lock is checked
 // in); fall back to npm. Reinstall from the registry to undo any dist-overlay.
 const bunAvailable = spawnSync("bun", ["--version"], { stdio: "ignore", shell: true }).status === 0;
 if (bunAvailable) {
-  run("bun", ["install"], { cwd: bridgeDir });
+  mustRun("bun", ["install"], { cwd: bridgeDir });
 } else {
   // npm install --no-save keeps package.json untouched.
-  run("npm", ["install", "--no-save"], { cwd: bridgeDir });
+  mustRun("npm", ["install", "--no-save"], { cwd: bridgeDir });
+}
+
+if (hadFailure) {
+  console.error(`\n✗ Unregister completed with errors. Registry node_modules may not have been restored — re-run the package manager install manually before publishing.`);
+  process.exit(1);
 }
 
 console.log(`\n✓ Unregistered '${name}' and restored registry node_modules.`);
