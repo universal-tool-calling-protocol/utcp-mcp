@@ -12,9 +12,11 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "node --max-old-space-size=8192 ./node_modules/typescript/bin/tsc",
     "prepublishOnly": "npm run build",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "dev:register": "node scripts/dev-register.mjs",
+    "dev:unregister": "node scripts/dev-unregister.mjs"
   },
   "keywords": [
     "utcp",
@@ -46,7 +48,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.20.2",
+    "@modelcontextprotocol/sdk": "~1.20.2",
     "@utcp/cli": "^1.0.12",
     "@utcp/http": "^1.0.13",
     "@utcp/mcp": "^1.0.12",
