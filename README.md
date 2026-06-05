@@ -135,6 +135,62 @@ With this MCP bridge, all your UTCP tools become available in Claude Desktop and
 
 For Python users, see the standalone Python implementation in [`python_mcp_bridge/`](python_mcp_bridge/)
 
+## ❓ FAQ
+
+### What is UTCP-MCP Bridge?
+The **last MCP server you'll ever need** — a universal, all-in-one MCP server that brings the full power of UTCP (Universal Tool Calling Protocol) to the MCP ecosystem. Works with Claude Desktop and any MCP client.
+
+### Available MCP Tools
+| Tool | Description |
+|------|-------------|
+| register_manual | Register new UTCP manuals/APIs |
+| deregister_manual | Remove registered manuals |
+| call_tool | Execute any registered UTCP tool |
+| search_tools | Find tools by description |
+| list_tools | List all registered tool names |
+| get_required_keys_for_tool | Get required environment variables |
+| tool_info | Get complete tool info and schema |
+
+### What is UTCP?
+Universal Tool Calling Protocol allows you to:
+- Connect to any API via HTTP, OpenAPI specs, or custom formats
+- Use command-line tools with automatic argument parsing
+- Process text and files with built-in utilities
+- Chain and combine multiple tools seamlessly
+
+### Quick Start
+Add to MCP client config:
+```json
+{
+  "mcpServers": {
+    "utcp": {
+      "command": "npx",
+      "args": ["@utcp/mcp-bridge"],
+      "env": {"UTCP_CONFIG_FILE": "/path/to/.utcp_config.json"}
+    }
+  }
+}
+```
+
+### Key Features
+- ✅ Zero installation — works via npx
+- ✅ Universal compatibility — any MCP client
+- ✅ Dynamic configuration
+- ✅ Environment isolation
+- ✅ Comprehensive tool management
+- ✅ Web interface available
+
+### Is UTCP-MCP Free?
+Yes, open-source. See repository for license details.
+
+### Help Resources
+| Channel | Link |
+|---------|------|
+| GitHub | https://github.com/universal-tool-calling-protocol/utcp-mcp |
+| Web UI | web_ui_utcp_mcp_bridge/ |
+
+---
+
 ## 🌐 Web Interface
 
 For advanced management with a web UI, check out [`web_ui_utcp_mcp_bridge/`](web_ui_utcp_mcp_bridge/)
