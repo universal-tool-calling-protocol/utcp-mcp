@@ -16,7 +16,8 @@
     "prepublishOnly": "npm run build",
     "start": "node dist/index.js",
     "dev:register": "node scripts/dev-register.mjs",
-    "dev:unregister": "node scripts/dev-unregister.mjs"
+    "dev:unregister": "node scripts/dev-unregister.mjs",
+    "test": "npm run build && node --test tests/"
   },
   "keywords": [
     "utcp",
