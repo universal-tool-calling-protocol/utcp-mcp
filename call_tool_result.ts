@@ -11,8 +11,15 @@ const isContentBlock = (value: unknown): value is ContentBlock => ContentBlockSc
  */
 export function toCallToolContent(toolName: string, result: unknown): ContentBlock[] {
     const items: unknown[] = Array.isArray(result) ? result : [result];
-    const content: ContentBlock[] = items.filter(isContentBlock);
-    const plain = items.filter((item) => !isContentBlock(item));
+    const content: ContentBlock[] = [];
+    const plain: unknown[] = [];
+    for (const item of items) {
+        if (isContentBlock(item)) {
+            content.push(item);
+        } else {
+            plain.push(item);
+        }
+    }
     const onlyContentBlocks = items.length > 0 && plain.length === 0;
     const value = Array.isArray(result) ? (onlyContentBlocks ? undefined : plain) : plain[0];
     content.push({

@@ -17,7 +17,7 @@
     "start": "node dist/index.js",
     "dev:register": "node scripts/dev-register.mjs",
     "dev:unregister": "node scripts/dev-unregister.mjs",
-    "test": "npm run build && node --test tests/"
+    "test": "npm run build && node --test tests/*.test.mjs"
   },
   "keywords": [
     "utcp",
