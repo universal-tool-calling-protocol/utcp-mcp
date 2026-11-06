@@ -29,7 +29,7 @@ import {
     UtcpClientConfigSerializer
 } from "@utcp/sdk";
 import type { UtcpClientConfig } from "@utcp/sdk";
-import { ContentBlock, ContentBlockSchema } from "@modelcontextprotocol/sdk/types.js";
+import { toCallToolContent } from "./call_tool_result.js";
 
 // Get current file directory for Node.js ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -97,30 +97,7 @@ function setupMcpTools() {
             // client natively instead of JSON-stringifying them, which would
             // turn binary payloads into raw base64 text and bloat the
             // conversation. Mirrors @utcp/code-mode-mcp's call_tool_chain.
-            const content: Array<ContentBlock> = [];
-            const nonMcp: Array<any> = [];
-
-            if (Array.isArray(result)) {
-                for (const item of result) {
-                    if (ContentBlockSchema.safeParse(item).success) {
-                        content.push(item as ContentBlock);
-                    } else {
-                        nonMcp.push(item);
-                    }
-                }
-            } else if (ContentBlockSchema.safeParse(result).success) {
-                content.push(result as ContentBlock);
-            } else {
-                nonMcp.push(result);
-            }
-
-            const plain = nonMcp.length > 1 ? nonMcp : nonMcp[0];
-            content.push({
-                type: "text",
-                text: JSON.stringify({ success: true, tool_name: input.tool_name, result: plain }),
-            });
-
-            return { content };
+            return { content: toCallToolContent(input.tool_name, result) };
         } catch (e: any) {
             return { content: [{ type: "text", text: JSON.stringify({ success: false, error: e.message }) }] };
         }
